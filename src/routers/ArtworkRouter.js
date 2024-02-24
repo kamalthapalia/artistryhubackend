@@ -77,14 +77,13 @@ router.get('/all', async (req, res) => {
             attributes: ['artwork_id']
         });
 
-        // Extract artwork IDs from the result
         const existingArtworkIds = orderItemArtworkIds.map(orderItem => orderItem.artwork_id);
 
-        // Find all artworks that are not sold and whose IDs are not in orderitems table
         const allArtworks = await artworks.findAll({
             where: {
                 id: {[Sequelize.Op.notIn]: existingArtworkIds}
-            }
+            },
+            order: [['createdAt', 'DESC']] // Order by createdAt attribute in descending order
         });
 
         res.json(allArtworks);
@@ -96,47 +95,86 @@ router.get('/all', async (req, res) => {
 });
 
 
-// artwork bought by particular user
+const getOrderItemArtworkIds = async () => {
+    const orderItemArtworkIds = await orderitems.findAll({
+        attributes: ['artwork_id']
+    });
 
+    return orderItemArtworkIds.map(orderItem => orderItem.artwork_id);
+};
 
-router.get('/bought/', validateToken, async (req, res) => {
+//return artworks on price range
+router.get('/price/:min/:max', async (req, res) => {
     try {
-        const token = req.headers['authorization'];
+        const min = req.params.min;
+        const max = req.params.max;
 
-        if (!token || !token.startsWith('Bearer ')) {
-            return res.status(401).send('Unauthorized');
-        }
+        // Fetch IDs of artworks that are already in orderitems table
+        const existingArtworkIds = await getOrderItemArtworkIds();
 
-        // Extract and verify token
-        const cleanedToken = token.substring(7);
-        const decodedToken = jwt.verify(cleanedToken, "hehe");
-        const userId = decodedToken.id; // Assuming user ID is in the token
-
-        // Find orders associated with the specified user ID
-        const orderss = await orders.findAll({
+        const artworks = await db.artworks.findAll({
             where: {
-                user_id: userId, // Use the extracted user ID
-                status: 'done' // Assuming 'done' represents completed orders
-            },
-            include: [
-                {
-                    model: orderitems,
-                    include: [
-                        {
-                            model: artworks // Assuming Artwork is the correct model
-                        }
-                    ]
+                id: {
+                    [Op.notIn]: existingArtworkIds
+                },
+                price: {
+                    [Op.between]: [min, max]
                 }
-            ]
+            },
+            order: [['createdAt', 'DESC']]
         });
 
-        // Extract artworks from order items
-        const artworks = orders.flatMap(order => order.OrderItems.map(item => item.Artwork));
+        res.json(artworks);
+    } catch (err) {
+        res.status(400).send({error: err.message, code: 400});
+    }
+});
+
+// Return artworks based on search title, excluding those already in orderitems table
+router.get('/search/:title', async (req, res) => {
+    try {
+        const title = req.params.title;
+
+        // Fetch IDs of artworks that are already in orderitems table
+        const existingArtworkIds = await getOrderItemArtworkIds();
+
+        const artworks = await db.artworks.findAll({
+            where: {
+                id: {
+                    [Op.notIn]: existingArtworkIds
+                },
+                title: {
+                    [Op.like]: `%${title}%`
+                }
+            }
+        });
 
         res.json(artworks);
-    } catch (error) {
-        console.error('Error:', error); // Log the error for debugging purposes
-        res.status(500).json({error: 'Internal Server Error' + error.message}); // Send a generic error response
+    } catch (err) {
+        res.status(400).send({error: err.message});
+    }
+});
+
+// Return artworks based on category ID, excluding those already in orderitems table
+router.get('/category/:id', async (req, res) => {
+    try {
+        const categoryId = req.params.id;
+
+        // Fetch IDs of artworks that are already in orderitems table
+        const existingArtworkIds = await getOrderItemArtworkIds();
+
+        const artworks = await db.artworks.findAll({
+            where: {
+                id: {
+                    [Op.notIn]: existingArtworkIds
+                },
+                category: categoryId
+            }
+        });
+
+        res.json(artworks);
+    } catch (err) {
+        res.status(400).send({error: err.message, code: 400});
     }
 });
 
@@ -181,6 +219,11 @@ router.delete('/delete/:id', validateArtist, validateToken, async (req, res) => 
             await artworks.destroy({
                 where: {id: id}
             });
+            //delete the file too
+            const artwork = await artworks.findOne({where: {id: id}});
+            const filePath = path.join(__dirname, 'uploads', artwork.image);
+            fs.unlinkSync(filePath);
+
             res.json({message: "Artwork deleted"});
         } catch (err) {
             res.status(400).send({error: "Artwork not found"});
@@ -189,20 +232,13 @@ router.delete('/delete/:id', validateArtist, validateToken, async (req, res) => 
 );
 
 
-router.get('/search/:title', async (req, res) => {
-        try {
-            const title = req.params.title;
-            const artworks = await db.artworks.findAll({where: {title: {[Op.like]: '%' + title + '%'}}});
-            res.json(artworks);
-        } catch (err) {
-            res.status(400).send({error: err.message});
-        }
-    }
-);
-
 router.get('/user/:id', async (req, res) => {
     try {
-        const artworks = await db.artworks.findAll({where: {artist: req.params.id}});
+        const artworks = await db.artworks.findAll({
+            where: {artist: req.params.id},
+            order: [['createdAt', 'DESC']] // Order by createdAt attribute in descending order
+        });
+
         const artworksWithoutOrderItems = [];
 
         for (const artwork of artworks) {
@@ -217,6 +253,7 @@ router.get('/user/:id', async (req, res) => {
         res.status(400).send({error: err.message});
     }
 });
+
 
 router.get('/sold/me', async (req, res) => {
     try {
@@ -270,3 +307,5 @@ router.get('/bought/me', async (req, res) => {
 });
 
 module.exports = router;
+
+//return artworks by category

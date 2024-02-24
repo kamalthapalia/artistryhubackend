@@ -24,5 +24,6 @@ db.artworks = require('./artworkModel')(sequelize, DataTypes)
 db.categories = require('./categoryModel')(sequelize, DataTypes)
 db.orderitems = require('./orderItemModel')(sequelize, DataTypes)
 db.orders = require('./orderModel')(sequelize, DataTypes)
+db.reviews = require('./reviewModel')(sequelize, DataTypes)
 
 module.exports = db

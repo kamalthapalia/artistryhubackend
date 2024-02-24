@@ -5,6 +5,7 @@ const imageRouter = require('./src/routers/imageRouter')
 const categoriesRouter = require('./src/routers/CategoryRouter')
 const orderRouter = require('./src/routers/orderRouter')
 const orderItemRouter = require('./src/routers/orderItemsRouter')
+const reviewRouter = require('./src/routers/reviewRouter')
 
 const app = express();
 const cors = require('cors');
@@ -22,3 +23,4 @@ app.use('/artworks', artworkRouter)
 app.use('/categories', categoriesRouter)
 app.use('/orders', orderRouter)
 app.use('/orderitems', orderItemRouter)
+app.use('/reviews', reviewRouter)

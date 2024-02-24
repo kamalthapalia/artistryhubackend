@@ -73,15 +73,18 @@ router.get('/auth', validateToken, async (req, res) => {
 });
 
 router.get('/artists', async (req, res) => {
-        try {
-            const artists = await db.users.findAll({where: {role: 'artist'}});
-            res.json(artists);
-        } catch (err) {
-            console.log(err)
-        }
-
+    try {
+        const artists = await db.users.findAll({
+            where: {role: 'artist'},
+            order: [['createdAt', 'DESC']] // Order by createdAt attribute in descending order
+        });
+        res.json(artists);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({error: 'Internal Server Error'});
     }
-);
+});
+
 
 router.get('/all', async (req, res) => {
     const users = await db.users.findAll();
