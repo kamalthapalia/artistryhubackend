@@ -198,6 +198,20 @@ router.get('/artwork/:id', async (req, res) => {
         res.status(400).send({code: 400, message: err.message});
     }
 });
+router.get('/artwork/order/:id', async (req, res) => {
+    try {
+        const artwork = await artworks.findOne({where: {id: parseInt(req.params.id)}});
+        if (artwork) {
+
+
+            res.json(artwork);
+        } else {
+            res.status(400).send({code: 400, message: "Artwork not found"});
+        }
+    } catch (err) {
+        res.status(400).send({code: 400, message: err.message});
+    }
+});
 
 
 router.put('/update/:id', validateArtist, validateToken, async (req, res) => {
