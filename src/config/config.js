@@ -1,7 +1,7 @@
 module.exports = {
-    user: 'artistryhub_user',
-    password: 'm5qRbkflzqsLWN2Ffeank87Z2bev2jyb',
-    database: 'artistryhub',
-    host: 'dpg-cni141821fec73com7s0-a',
+    user: 'sql6688251',
+    password: 'TEvFR8Cykr',
+    database: 'sql6688251',
+    host: 'sql6.freemysqlhosting.net',
     dialect: 'mysql',
 };
