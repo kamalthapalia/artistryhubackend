@@ -7,7 +7,7 @@ const sequelize = new Sequelize(config.database, config.user, config.password, {
     logging: false,
 })
 sequelize.authenticate().then(() => {
-    console.log("Connected to database.")
+    console.log("Connected to database")
 })
     .catch(err => {
         console.log("db conn err: " + err)
