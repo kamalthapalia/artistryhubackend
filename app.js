@@ -8,12 +8,16 @@ const orderItemRouter = require('./src/routers/orderItemsRouter')
 const reviewRouter = require('./src/routers/reviewRouter')
 
 const app = express();
-const cors = require('cors');
 app.use(express.json())
-app.use(cors())
+const cors = require('cors');
+app.use(cors);
+
 app.use(express.urlencoded({extended: true}))
-app.listen(8080, () => {
+app.listen(3000, () => {
     console.log("Server is running")
+})
+app.get("/", (req, res) => {
+    res.send("Welcome to Art Gallery")
 })
 
 //routes

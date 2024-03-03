@@ -55,9 +55,7 @@ router.post('/add', upload.single('image'), validateArtist, validateToken, async
         const artwork = await artworks.create({
             ...req.body,
             artist: id,
-            image: filename,
-            sold: "not"
-            // Save only the image title to the database
+            image: filename
         });
 
         res.json(artwork);

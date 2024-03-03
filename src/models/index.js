@@ -4,7 +4,7 @@ const {DataTypes, Sequelize} = require("sequelize");
 const sequelize = new Sequelize(config.database, config.user, config.password, {
     host: config.host,
     dialect: config.dialect,
-    logging: console.log
+    logging: false,
 })
 sequelize.authenticate().then(() => {
     console.log("Connected to database")

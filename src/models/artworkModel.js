@@ -28,10 +28,6 @@ module.exports = (sequelize, DataTypes) => {
         image: {
             type: DataTypes.STRING,
             allowNull: false
-        },
-        sold: {
-            type: DataTypes.STRING,
-            allowNull: false
         }
     })
     return Artwork;
