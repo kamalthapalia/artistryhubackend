@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 
 //how would the path look
-//localhost:8080/image/imagename
+//localhost:3000/image/imagename
 
 router.get('/:imageName', (req, res) => {
     try {
